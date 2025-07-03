@@ -1,66 +1,94 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'TERRAFORM_ACTION',
+            choices: ['apply', 'destroy'],
+            description: 'Select Terraform action: apply to provision, destroy to tear down'
+        )
+    }
+
     environment {
-        // Set your AWS region
-        AWS_DEFAULT_REGION = 'us-east-1'
-        // Add more environment variables if needed
+        // Add your AWS credentials or use instance profile
+        // AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        // AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        // Optionally set AWS_DEFAULT_REGION
     }
 
     options {
-        // Keep only the last 10 builds to save space
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+        timestamps()
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Jenkins will automatically check out the repo if using Pipeline from SCM,
-                // but this is explicit for clarity.
+                cleanWs()
                 checkout scm
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                sh 'terraform init -input=false'
             }
         }
 
         stage('Terraform Validate') {
+            when {
+                expression { params.TERRAFORM_ACTION == 'apply' }
+            }
             steps {
                 sh 'terraform validate'
             }
         }
 
         stage('Terraform Plan') {
+            when {
+                expression { params.TERRAFORM_ACTION == 'apply' }
+            }
             steps {
                 sh 'terraform plan -out=tfplan'
-                // Optionally, archive the plan file
-                archiveArtifacts artifacts: 'tfplan', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'tfplan', onlyIfSuccessful: true
             }
         }
 
-        stage('Terraform Apply') {
+        stage('Manual Approval') {
+            when {
+                expression { params.TERRAFORM_ACTION == 'destroy' }
+            }
             steps {
-                // Optional: Add manual approval before apply in production
-                input(message: 'Approve to apply Terraform changes?')
-                sh 'terraform apply -auto-approve tfplan'
+                script {
+                    input message: 'Are you absolutely sure you want to destroy all resources?'
+                }
+            }
+        }
+
+        stage('Terraform Action') {
+            steps {
+                script {
+                    if (params.TERRAFORM_ACTION == 'apply') {
+                        sh 'terraform apply -auto-approve tfplan'
+                    } else if (params.TERRAFORM_ACTION == 'destroy') {
+                        // Backup state file before destroy (best practice)
+                        sh 'cp terraform.tfstate terraform.tfstate.backup || true'
+                        sh 'terraform destroy -auto-approve'
+                    }
+                }
             }
         }
     }
 
     post {
         always {
-            // Archive Terraform state files for reference (do NOT use this for state backup)
-            archiveArtifacts artifacts: '**/*.tfstate', allowEmptyArchive: true
-            // Clean up plan file
-            sh 'rm -f tfplan'
+            archiveArtifacts artifacts: '*.tfstate*', onlyIfSuccessful: false
+            cleanWs()
         }
         failure {
-            mail to: 'your-team@example.com',
-                 subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Check Jenkins for details: ${env.BUILD_URL}"
+            mail to: 'devops-team@example.com',
+                 subject: "Jenkins Terraform Pipeline FAILED: ${env.JOB_NAME} [${env.BUILD_NUMBER}]",
+                 body: "Check the Jenkins job for details."
         }
     }
 }
