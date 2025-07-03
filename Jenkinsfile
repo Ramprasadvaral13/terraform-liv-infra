@@ -11,7 +11,6 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
-        // Add more environment variables or credentials as needed
     }
 
     options {
