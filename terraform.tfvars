@@ -15,8 +15,8 @@ subnets = {
   }
 }
 
-ami_id           = "ami-0c02fb55956c7d316" # Amazon Linux 2
-instance_type    = "t3.micro"
+ami_id           = "ami-020cba7c55df1f615" # ubuntu
+instance_type    = "t2.large"
 min_size         = 2
 max_size         = 4
 desired_capacity = 2
