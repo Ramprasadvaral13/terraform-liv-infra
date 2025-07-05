@@ -23,7 +23,7 @@ desired_capacity = 2
 root_volume_size = 10
 user_data        = <<EOF
 #!/bin/bash
-yum update -y
+sudo apt update -y
 amazon-linux-extras install nginx1 -y
 systemctl enable nginx
 systemctl start nginx
