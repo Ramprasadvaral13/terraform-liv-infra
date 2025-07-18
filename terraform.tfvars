@@ -3,12 +3,12 @@ vpc_cidr   = "10.1.0.0/16"
 route_cidr = "0.0.0.0/0"
 
 subnets = {
-  "public-1" = {
+  "test-public-1" = {
     cidr   = "10.1.1.0/24"
     az     = "us-east-1a"
     public = true
   },
-  "private-1" = {
+  "test-private-1" = {
     cidr   = "10.1.2.0/24"
     az     = "us-east-1a"
     public = false
