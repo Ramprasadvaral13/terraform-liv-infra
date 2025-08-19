@@ -8,8 +8,13 @@ subnets = {
     az     = "us-east-1a"
     public = true
   },
-  "private-1" = {
+  "public-2" = {
     cidr   = "10.0.2.0/24"
+    az     = "us-east-1b"
+    public = true
+  },
+  "private-1" = {
+    cidr   = "10.0.3.0/24"
     az     = "us-east-1a"
     public = false
   }
