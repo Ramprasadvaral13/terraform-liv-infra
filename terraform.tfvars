@@ -17,6 +17,11 @@ subnets = {
     cidr   = "10.0.3.0/24"
     az     = "us-east-1a"
     public = false
+  },
+  "private-2" = {
+    cidr   = "10.0.4.0/24"
+    az     = "us-east-1b"
+    public = false
   }
 }
 
