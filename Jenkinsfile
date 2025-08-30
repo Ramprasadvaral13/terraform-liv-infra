@@ -88,4 +88,4 @@ pipeline {
                  body: "Check Jenkins for details: ${env.BUILD_URL}"
         }
     }
-} check any syntax errors
+}
