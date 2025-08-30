@@ -1,5 +1,6 @@
 pipeline {
-    agent any
+    agent { label 'jenkins-worker-nodes' }
+
 
     parameters {
         choice(
@@ -87,4 +88,4 @@ pipeline {
                  body: "Check Jenkins for details: ${env.BUILD_URL}"
         }
     }
-}
+} check any syntax errors
