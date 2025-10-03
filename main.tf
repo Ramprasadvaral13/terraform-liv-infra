@@ -7,7 +7,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "shreyas-terraform-state-bucket-123456"
+    bucket         = "kohli-terraform-state-bucket-123456"
     key            = "networking/vpc/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-locks"
